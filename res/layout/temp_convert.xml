@@ -5,6 +5,12 @@
     android:orientation="vertical" >
     
     <TextView 
+        android:id="@+id/lbl_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lbl_title" />
+    
+    <TextView 
         android:id="@+id/lbl_celcius"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +20,8 @@
         android:id="@+id/txt_celcius"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number" />
+        android:inputType="numberSigned|numberDecimal"
+        android:gravity="right|center_vertical" />
     
     <TextView 
         android:id="@+id/lbl_fahrenheit"
@@ -26,6 +33,7 @@
         android:id="@+id/txt_fahrenheit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number" />
+        android:inputType="numberSigned|numberDecimal"
+        android:gravity="right|center_vertical" />
 
 </LinearLayout>

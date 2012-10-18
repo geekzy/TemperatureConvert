@@ -6,5 +6,6 @@
     <string name="title_activity_temp_convert">Temp Convert</string>
     <string name="lbl_celcius">Celcius</string>
     <string name="lbl_fahrenheit">Fahrenheit</string>
+    <string name="lbl_title">Enter Temperature</string>
 
 </resources>
