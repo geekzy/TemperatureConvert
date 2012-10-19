@@ -6,6 +6,7 @@ import static android.test.ViewAsserts.assertRightAligned;
 
 import java.util.concurrent.CountDownLatch;
 
+import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.Gravity;
 import android.view.View;
@@ -14,9 +15,12 @@ import android.widget.TextView;
 
 import com.samsung.android.temperatureconverter.R;
 import com.samsung.android.temperatureconverter.TempConvertActivity;
+import com.samsung.android.temperatureconverter.TempConverter;
 
 public class TempConvertActivityTest extends
 ActivityInstrumentationTestCase2<TempConvertActivity> {
+	protected static final String EMPTY_STRING = "";
+
 	protected final CountDownLatch signal = new CountDownLatch(1);
 
 	private TempConvertActivity mActivity;
@@ -56,39 +60,40 @@ ActivityInstrumentationTestCase2<TempConvertActivity> {
 		assertNotNull(mFahrenheit);
 	}
 
-	public void testFormTitle() {
+	public final void testFormTitle() {
 		final String TITLE = "Enter Temperature";
 		assertEquals(TITLE, mLblTitle.getText().toString());
 	}
 
-	public void testLabelAlignment() {
+	public final void testLabelAlignment() {
 		assertLeftAligned(mLblCelcius, mLblFahrenheit);
 		assertLeftAligned(mLblTitle, mLblCelcius);
 		assertLeftAligned(mCelcius, mFahrenheit);
 		assertRightAligned(mCelcius, mFahrenheit);
 	}
 
-	public void testHasInput() {
+	public final void testHasInput() {
 		View origin = mActivity.getWindow().getDecorView();
 
 		assertOnScreen(origin, mCelcius);
 		assertOnScreen(origin, mFahrenheit);
 	}
 
-	public void testInputIsEmpty() {
+	public final void testInputIsEmpty() {
 		final String EMPTY_STR = "";
 
 		assertEquals(EMPTY_STR, mCelcius.getText().toString());
 		assertEquals(EMPTY_STR, mFahrenheit.getText().toString());
 	}
 
-	public void testInputIsDecimal() throws Exception {
+	public final void testInputIsDecimal() throws Exception {
 		final String expected = "-5.55";
 
 		mActivity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				mCelcius.requestFocus();
+				mCelcius.setText(EMPTY_STRING);
 			}
 		});
 		sendKeys("MINUS 5 NUMPAD_DOT 5 5");
@@ -98,13 +103,14 @@ ActivityInstrumentationTestCase2<TempConvertActivity> {
 			@Override
 			public void run() {
 				mFahrenheit.requestFocus();
+				mFahrenheit.setText(EMPTY_STRING);
 			}
 		});
 		sendKeys("MINUS 5 NUMPAD_DOT 5 5");
 		assertEquals(expected, mFahrenheit.getText().toString());
 	}
 
-	public void testInputJustification() {
+	public final void testInputJustification() {
 		final int expected = Gravity.RIGHT | Gravity.CENTER_VERTICAL;
 		assertEquals(expected, mCelcius.getGravity());
 		assertEquals(expected, mFahrenheit.getGravity());
@@ -115,5 +121,59 @@ ActivityInstrumentationTestCase2<TempConvertActivity> {
 		final int actual = mFahrenheit.getBottom();
 
 		assertTrue(actual <= expected);
+	}
+
+	public final void testRetainValue() {
+		final String expected = "-5.55";
+		Instrumentation mInstr = this.getInstrumentation();
+
+		mActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mCelcius.requestFocus();
+			}
+		});
+		sendKeys("MINUS 5 NUMPAD_DOT 5 5");
+
+		// pause it
+		mInstr.callActivityOnPause(mActivity);
+
+		// check it
+		assertEquals(expected, mCelcius.getText().toString());
+
+		// resume it
+		mInstr.callActivityOnResume(mActivity);
+
+		// check it
+		assertEquals(expected, mCelcius.getText().toString());
+
+	}
+
+	public final void testConvertFahrenheitToCelcius() {
+		mActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mFahrenheit.requestFocus();
+			}
+		});
+		sendKeys("5 5");
+
+		final Double expected = TempConverter.fahrenheitToCelcius(55d);
+		final Double actual = Double.valueOf(mCelcius.getText().toString());
+		assertEquals(expected, actual);
+	}
+
+	public final void testConvertCelciusToFahrenheit() {
+		mActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mCelcius.requestFocus();
+			}
+		});
+		sendKeys("5 NUMPAD_DOT 5");
+
+		final Double expected = TempConverter.celsiusToFahrenheit(5.5d);
+		final Double actual = Double.valueOf(mFahrenheit.getText().toString());
+		assertEquals(expected, actual);
 	}
 }
